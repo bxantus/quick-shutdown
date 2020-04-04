@@ -102,23 +102,9 @@ namespace ShutdownTest
 
         void InitiateShutdown()
         {
-            ManagementBaseObject mboShutdown = null;
-            ManagementClass mcWin32 = new ManagementClass("Win32_OperatingSystem");
-            mcWin32.Get();
-
-            // You can't shutdown without security privileges
-            mcWin32.Scope.Options.EnablePrivileges = true;
-            ManagementBaseObject mboShutdownParams =
-                     mcWin32.GetMethodParameters("Win32Shutdown");
-
-            // Flag 1 means we want to shut down the system. Use "2" to reboot.
-            mboShutdownParams["Flags"] = "1";
-            mboShutdownParams["Reserved"] = "0";
-            foreach (ManagementObject manObj in mcWin32.GetInstances())
-            {
-                mboShutdown = manObj.InvokeMethod("Win32Shutdown",
-                                               mboShutdownParams, null);
-            }
+            // we don't care about the lifetime of the shutdown process, as it will terminate this application as well
+            Process shutDownProc = Process.Start("shutdown", "/s /t 5"); // shutdown in 5 seconds
+            // see: https://docs.microsoft.com/en-us/windows-server/administration/windows-commands/shutdown
         }
 
         // Util methods ----------------------------------------------------
@@ -156,7 +142,7 @@ namespace ShutdownTest
 
                 // start counting timer   
                 checkEllapsedTime.Enabled = true;
-                checkEllapsedTime.Interval = 60 * 1000; // check each second 
+                checkEllapsedTime.Interval = 60 * 1000; // check each minute 
             }
             else if (timeLeft * 1000 <= START_FREQUENT_TIMER)
             {
